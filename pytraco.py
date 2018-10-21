@@ -16,6 +16,10 @@ def parse_to_one(event):
     return f"{event.time} CONN {event.from_node} {event.to_node} {event.opening_status()}{os.linesep}"
 
 
+def parse_to_crawdad_arcs(event):
+    return f"{event.time} {event.from_node} {event.to_node} {event.opening_status().upper()}{os.linesep}"
+
+
 def main():
     module, theclass = args.extracter.split('.')
     Extracter = getattr(importlib.import_module(module), theclass)
@@ -40,7 +44,8 @@ def main():
             if args.set_init_time:
                 event.time = event.time - init_time
 
-            f.write(parse_to_one(event))
+            #f.write(parse_to_one(event))
+            f.write(parse_to_crawdad_arcs(event))
 
 
 if __name__ == "__main__":
