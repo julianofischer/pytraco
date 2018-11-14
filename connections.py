@@ -18,6 +18,7 @@ class Event:
 
 
 class Connection:
+
     def __init__(self, upevent, downevent):
         self.from_node = upevent.from_node
         self.to_node = upevent.to_node
