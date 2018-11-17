@@ -129,7 +129,7 @@ def main():
 
         extract_info(g, current_time)
         current_time = current_time + logstep
-git 
+
     log_info()
 
 if __name__ == '__main__':
