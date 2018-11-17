@@ -130,9 +130,5 @@ def main():
         current_time = current_time + logstep
 
 
-
-
-
-
 if __name__ == '__main__':
     main()
