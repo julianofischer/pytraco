@@ -4,15 +4,15 @@ import argparse
 import networkx as nx
 
 
-parser = argparse.ArgumentParser(description="Descrição")
-parser.add_argument("-f", "--file", dest="filename", help="the trace file which will be analyzed",
-                    metavar="FILENAME")
-parser.add_argument("-s", "--step", dest="log_step", help="The step for logging information (every x seconds)",
+parser = argparse.ArgumentParser(description="Extracts information from reachability traces")
+parser.add_argument(dest="filename", help="the trace file which will be analyzed",
+                    metavar="FILENAME", nargs='?')
+parser.add_argument("-s", "--step", dest="logstep", default=1, help="The step for logging information (every x seconds)",
                     metavar="STEP")
 parser.add_argument("--indegree", dest="indegree", action='store_true')
 parser.add_argument("--outdegree", dest="outdegree", action='store_true')
 parser.add_argument("--inoutratio", dest="outdegree", action='store_true')
-parser.set_defaults(indegree=False, outdegree=False, inoutratio=False, log_step=1)
+parser.set_defaults(indegree=True, outdegree=True, inoutratio=True, log_step=1)
 args = parser.parse_args()
 
 
@@ -48,8 +48,8 @@ def get_events(f):
             # closed in the second immediately after the end_time
             close_time = end_time + 1
             up_event = Event(from_node, to_node, init_time, True)
-            down_event = Event(from_node, to_node, close_time, True)
-            events.append([up_event, down_event])
+            down_event = Event(from_node, to_node, close_time, False)
+            events.extend([up_event, down_event])
     return events
 
 
@@ -62,7 +62,7 @@ def compute_avg_in_degree(graph, time):
 
 def compute_avg_out_degree(graph, time):
     nodes = graph.nodes()
-    out_degrees = [graph.in_degree(node) for node in nodes]
+    out_degrees = [graph.out_degree(node) for node in nodes]
     avg = float(sum(out_degrees))/len(nodes)
     dict_avg_out_degree[time] = avg
 
@@ -78,22 +78,23 @@ def extract_info(graph, time):
 def log_info():
     if args.indegree:
         outfile = f'{args.filename}.avgindegree'
-        with open(outfile) as f:
+        with open(outfile, 'w') as f:
             for index in dict_avg_in_degree:
                 f.write(f'{index}\t{dict_avg_in_degree[index]}\n')
 
     if args.outdegree:
         outfile = f'{args.filename}.avgoutdegree'
-        with open(outfile) as f:
+        with open(outfile, 'w') as f:
             for index in dict_avg_out_degree:
                 f.write(f'{index}\t{dict_avg_out_degree[index]}\n')
 
-    if args.inoutratio:
-        outfile = f'{args.filename}.inoutratio'
-        ratio = [(index, float(dict_avg_in_degree[index])/dict_avg_out_degree[index]) for index in dict_avg_in_degree]
-        with open(outfile) as f:
-            for t in ratio:
-                f.write(f'{t[0]}\t{t[1]}\n')
+    # zerodivisionerror desativar
+    #if args.inoutratio:
+    #    outfile = f'{args.filename}.inoutratio'
+    #    ratio = [(index, float(dict_avg_in_degree[index])/dict_avg_out_degree[index]) for index in dict_avg_in_degree]
+    #    with open(outfile, 'w') as f:
+    #        for t in ratio:
+    #            f.write(f'{t[0]}\t{t[1]}\n')
 
 
 def main():
@@ -118,7 +119,7 @@ def main():
     # where there are events to process
     while len(events) > 0:
         # looking for events within the desired range
-        while events[0].time <= current_time:
+        while len(events) > 0 and events[0].time <= current_time:
             # since eventes are ordered by time, it are always popped from the head of the queue
             event = events.pop(0)
             if event.is_opening:
@@ -128,7 +129,8 @@ def main():
 
         extract_info(g, current_time)
         current_time = current_time + logstep
-
+git 
+    log_info()
 
 if __name__ == '__main__':
     main()
