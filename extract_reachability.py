@@ -3,6 +3,7 @@ __author__ = "Juliano Fischer Naves"
 
 # ESTÁ CONSUMINDO MUITA MEMÓRIA
 # CRIAR ENTRADAS NOS DICIONÁRIOS SOMENTE SE MUDOU O ESTADO
+
 import argparse
 
 
@@ -19,6 +20,7 @@ parser.set_defaults(log_step=1)
 args = parser.parse_args()
 
 
+
 dict_avg_in_degree = {}
 dict_avg_out_degree = {}
 nodes_in_degree = {}
@@ -32,6 +34,11 @@ def init_dicts():
         nodes_out_degree.setdefault(node, dict())
         dict_avg_in_degree.setdefault(node, 0)
         dict_avg_out_degree.setdefault(node, 0)
+
+
+# dict_avg_in_degree = {}
+# dict_avg_out_degree = {}
+nodes = set()
 
 
 def get_events(f):
@@ -56,11 +63,13 @@ def get_events(f):
     return events
 
 
+
 def log_info(d, sufix):
     outfile = f'{args.filename}.{sufix}'
     with open(outfile, 'w') as f:
         for index in d:
             f.write(f'{index}\t{d[index]}\n')
+
 
 
 def main():
@@ -72,8 +81,19 @@ def main():
 
     events = get_events(filename)
 
+
     init_dicts()
 
+
+    '''nodes = set()
+    for event in events:
+        # from node
+        nodes.add(event[0])
+        # to node
+        nodes.add(event[1])'''
+
+    # g = nx.DiGraph()
+    # g.add_nodes_from(nodes)
     print("The number of nodes is %d" % (len(nodes),))
 
     # sorting the events by the time they occurred
@@ -87,6 +107,7 @@ def main():
         # while event.time <= current_time
         while len(events) > 0 and events[0][2] <= current_time:
             # since events are ordered by time, it are always popped from the head of the queue
+
             event = events.pop(0)
             # if is_opening
             if event[3]:
@@ -106,6 +127,7 @@ def main():
 
         dict_total_edges[current_time] = total_edges
         current_time = current_time + logstep
+
 
     log_info(dict_total_edges, 'total_edges')
     for node in nodes:
